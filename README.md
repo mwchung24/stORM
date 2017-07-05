@@ -14,7 +14,7 @@ The `dog.rb` file sets up three models (`Dog`, `Human` and a `House`).  The file
 
 ### Database Manipulation and Querying
 
-### `::all`
+#### `::all`
 
 Returns an array of Ruby objects that belong to that specific class.
 
