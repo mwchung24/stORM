@@ -138,6 +138,7 @@ end
 Inserts an object into the corresponding table.
 
 ie `new_dog = Dog.new(name: "new_name", owner_id: id)`
+
 `new_dog.insert`
 
 ```ruby
