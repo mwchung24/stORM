@@ -8,9 +8,10 @@ The `dog.rb` file sets up three models (`Dog`, `Human` and a `House`).  The file
 
 ### Setup
 
-1. Download the library and navigate to the root directory of the file.
-2. Open pry and load the dog.rb file by typing load 'dog.rb'.
-3. Start testing!
+1. Download/clone the library
+2. Navigate to the root directory of the file in the terminal.
+3. Open pry and `load 'dog.rb'`.
+4. Start testing!
 
 ### Database Manipulation and Querying
 
@@ -18,9 +19,33 @@ The `dog.rb` file sets up three models (`Dog`, `Human` and a `House`).  The file
 
 Returns an array of Ruby objects that belong to that specific class.
 
+```ruby
+def self.all
+  all = DBConnection.execute(<<-SQL)
+  SELECT
+    #{self.table_name}.*
+  FROM
+    #{self.table_name}
+  SQL
+  parse_all(all)
+end
+```
+
 #### `::find(id)`
 
 Returns a Ruby object with the corresponding `id`.  Returns `nil` if record does not exist.
+
+#### `::first`
+
+Returns the first Ruby object.
+
+#### `::last`
+
+Returns the last Ruby object.
+
+#### `::table_name`
+
+
 
 #### `#initialize(params = {})`
 

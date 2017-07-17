@@ -51,6 +51,32 @@ class SQLObject
     parse_all(all)
   end
 
+  def self.first
+    first = DBConnection.execute(<<-SQL)
+    SELECT
+      #{self.table_name}.*
+    FROM
+      #{self.table_name}
+    LIMIT
+      1
+    SQL
+    parse_all(first).first
+  end
+
+  def self.last
+    last = DBConnection.execute(<<-SQL)
+    SELECT
+      #{self.table_name}.*
+    FROM
+      #{self.table_name}
+    ORDER BY
+      id DESC
+    LIMIT
+      1
+    SQL
+    parse_all(last).first
+  end
+
   def self.parse_all(results)
     instances = results.map do |result|
       self.new(result)
@@ -59,7 +85,7 @@ class SQLObject
   end
 
   def self.find(id)
-    one_cat = DBConnection.execute(<<-SQL, id)
+    one_dog = DBConnection.execute(<<-SQL, id)
     SELECT
       #{self.table_name}.*
     FROM
@@ -68,7 +94,7 @@ class SQLObject
       id = ?
     SQL
 
-    parse_all(one_cat).first
+    parse_all(one_dog).first
   end
 
   def initialize(params = {})
