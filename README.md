@@ -17,8 +17,9 @@ The `dog.rb` file sets up three models (`Dog`, `Human` and a `House`).  The file
 
 #### `::all`
 
-`Human.all` or `House.all` or `Dog.all`
 Returns an array of Ruby objects that belong to that specific class.
+
+ie `Dog.all`
 
 ```ruby
 def self.all
