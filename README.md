@@ -37,6 +37,8 @@ end
 
 Returns a Ruby object with the corresponding `id`.  Returns `nil` if record does not exist.
 
+ie `Human.find(1)`
+
 ```ruby
 def self.find(id)
   one_dog = DBConnection.execute(<<-SQL, id)
@@ -56,6 +58,8 @@ end
 
 Returns the first Ruby object.
 
+ie `House.first`
+
 ```ruby
 def self.first
   first = DBConnection.execute(<<-SQL)
@@ -73,6 +77,8 @@ end
 #### `::last`
 
 Returns the last Ruby object.
+
+ie `Dog.last`
 
 ```ruby
 def self.last
@@ -92,23 +98,123 @@ end
 
 #### `::table_name`
 
+Returns an instance variable of the table name or creates a table name.
 
+```ruby
+def self.table_name
+  @table_name || self.name.to_s.pluralize.tableize
+end
+```
+
+#### `::table_name=(table_name)`
+
+Takes the argument and sets the table name to the argument.
+
+```ruby
+def self.table_name=(table_name)
+  @table_name = table_name
+end
+```
 
 #### `#initialize(params = {})`
 
 Return a Ruby object with the params provided.  The params should be provided in a key-value pair the key is a column name and the value is the value for the new object under that specific column name.  ie. `{name: "Martin"}`, `:name` is the column name and "Martin" is the value.  If a column name is provided and does not exist on the table, then an error will be raised.
 
+```ruby
+def initialize(params = {})
+  params.each do |name, value|
+    name = name.to_sym
+    if self.class.columns.include?(name)
+      self.send("#{name}=", value)
+    else
+      raise "unknown attribute '#{name}'"
+    end
+  end
+end
+```
+
+#### `insert`
+
+Inserts an object into the corresponding table.
+
+ie `new_dog = Dog.new(name: "new_name", owner_id: id)`
+`new_dog.insert`
+
+```ruby
+def insert
+  col_names = self.class.columns[1..-1].join(", ")
+  question_marks = (["?"] * attribute_values.length).join(", ")
+  DBConnection.execute(<<-SQL, *attribute_values)
+  INSERT INTO
+    #{self.class.table_name} (#{col_names})
+  VALUES
+    (#{question_marks})
+  SQL
+
+  self.id = DBConnection.last_insert_row_id
+end
+```
+
+#### `update`
+
+Updates objects in the database
+
+ie `dog = Dog.last`
+`dog.name = "new_name"`
+`dog.update`
+
+```ruby
+def update
+  id = self.attributes[:id]
+  attr_name = self.class.columns.map do |column|
+    "#{column} = ?"
+  end
+  attr_name = attr_name.join(", ")
+  DBConnection.execute(<<-SQL, *attribute_values, id)
+  UPDATE
+    #{self.class.table_name}
+  SET
+    #{attr_name}
+  WHERE
+    id = ?
+  SQL
+end
+```
+
 #### `#save`
 
 Saves or updates the new record to the database.
 
-#### `where(params)`
+ie `new_dog = Dog.first`
+`new_dog.name = "new_name"`
+`new_dog.save`
 
-Return an array of Ruby objects that satisfy the provided params.
+```ruby
+def save
+  if self.attributes[:id].nil?
+    self.insert
+  else
+    self.update
+  end
+end
+```
 
 #### `belongs_to(name, options = {})`
 
+ie `Dog.first.owner`
+
 The class with the `belongs_to` association usually contains a foreign key that references another Ruby object.  This is a one-to-one relation and this method defines an instance method on the name that is passed in through the params.  The associated model is returned.
+
+```ruby
+class Dog < SQLObject
+  belongs_to :owner,
+    class_name: 'Human'
+
+  has_one_through :home, :owner, :house
+
+  finalize!
+end
+```
 
 #### Options
 
@@ -126,6 +232,21 @@ The primary key option should either be a symbol or string.  The primary key wil
 
 #### `has_many(name, options = {})`
 
+ie `Human.find(3).dogs`
+
+```ruby
+class Human  < SQLObject
+  self.table_name = 'humans'
+
+  belongs_to :house
+
+  has_many :dogs,
+    foreign_key: :owner_id
+
+  finalize!
+end
+```
+
 The class with the `has_many` association usually does not contain a foreign key.  This is a one-to-many relation and this method defines an instance method on the name that is passed in through the params.  The associated models are returned in an array.
 
 `:class_name`
@@ -141,5 +262,18 @@ The foreign key option should either be a symbol or string.  The name provided i
 The primary key option should either be a symbol or string.  The primary key will most likely always be set to `id`.
 
 #### `has_one_through(name, through_name, source_name)`
+
+ie `Dog.first.home`
+
+```ruby
+class Dog < SQLObject
+  belongs_to :owner,
+    class_name: 'Human'
+
+  has_one_through :home, :owner, :house
+
+  finalize!
+end
+```
 
 This association is a one-to-one relationship where the current model reaches through an already existing association to create a new association.  
