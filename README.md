@@ -206,9 +206,9 @@ end
 
 #### `belongs_to(name, options = {})`
 
-ie `Dog.first.owner`
-
 The class with the `belongs_to` association usually contains a foreign key that references another Ruby object.  This is a one-to-one relation and this method defines an instance method on the name that is passed in through the params.  The associated model is returned.
+
+ie `Dog.first.owner`
 
 ```ruby
 class Dog < SQLObject
@@ -237,6 +237,8 @@ The primary key option should either be a symbol or string.  The primary key wil
 
 #### `has_many(name, options = {})`
 
+The class with the `has_many` association usually does not contain a foreign key.  This is a one-to-many relation and this method defines an instance method on the name that is passed in through the params.  The associated models are returned in an array.
+
 ie `Human.find(3).dogs`
 
 ```ruby
@@ -252,8 +254,6 @@ class Human  < SQLObject
 end
 ```
 
-The class with the `has_many` association usually does not contain a foreign key.  This is a one-to-many relation and this method defines an instance method on the name that is passed in through the params.  The associated models are returned in an array.
-
 `:class_name`
 
 The class name option should either be a symbol or string.  The name provided in the parameter is used and converted to `CamelCase` and singularized.  If the name provided was dog, then the class name would be Dog.
@@ -268,6 +268,8 @@ The primary key option should either be a symbol or string.  The primary key wil
 
 #### `has_one_through(name, through_name, source_name)`
 
+This association is a one-to-one relationship where the current model reaches through an already existing association to create a new association.  
+
 ie `Dog.first.home`
 
 ```ruby
@@ -280,5 +282,3 @@ class Dog < SQLObject
   finalize!
 end
 ```
-
-This association is a one-to-one relationship where the current model reaches through an already existing association to create a new association.  
