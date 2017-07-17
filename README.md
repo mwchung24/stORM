@@ -17,6 +17,7 @@ The `dog.rb` file sets up three models (`Dog`, `Human` and a `House`).  The file
 
 #### `::all`
 
+`Human.all` or `House.all` or `Dog.all`
 Returns an array of Ruby objects that belong to that specific class.
 
 ```ruby
@@ -35,13 +36,58 @@ end
 
 Returns a Ruby object with the corresponding `id`.  Returns `nil` if record does not exist.
 
+```ruby
+def self.find(id)
+  one_dog = DBConnection.execute(<<-SQL, id)
+  SELECT
+    #{self.table_name}.*
+  FROM
+    #{self.table_name}
+  WHERE
+    id = ?
+  SQL
+
+  parse_all(one_dog).first
+end
+```
+
 #### `::first`
 
 Returns the first Ruby object.
 
+```ruby
+def self.first
+  first = DBConnection.execute(<<-SQL)
+  SELECT
+    #{self.table_name}.*
+  FROM
+    #{self.table_name}
+  LIMIT
+    1
+  SQL
+  parse_all(first).first
+end
+```
+
 #### `::last`
 
 Returns the last Ruby object.
+
+```ruby
+def self.last
+  last = DBConnection.execute(<<-SQL)
+  SELECT
+    #{self.table_name}.*
+  FROM
+    #{self.table_name}
+  ORDER BY
+    id DESC
+  LIMIT
+    1
+  SQL
+  parse_all(last).first
+end
+```
 
 #### `::table_name`
 
