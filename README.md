@@ -161,7 +161,9 @@ end
 Updates objects in the database
 
 ie `dog = Dog.last`
+
 `dog.name = "new_name"`
+
 `dog.update`
 
 ```ruby
@@ -187,7 +189,9 @@ end
 Saves or updates the new record to the database.
 
 ie `new_dog = Dog.first`
+
 `new_dog.name = "new_name"`
+
 `new_dog.save`
 
 ```ruby
